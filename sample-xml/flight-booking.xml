@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             id="Definitions_FlightBooking"
+             targetNamespace="http://example.com/bpmn">
+
+  <process id="FlightBookingProcess" name="Flight Booking via Agent" isExecutable="true">
+    <startEvent id="StartEvent_Request" name="Customer Request">
+      <outgoing>Flow1</outgoing>
+    </startEvent>
+
+    <userTask id="Task_SearchFlights" name="Search Flights">
+      <incoming>Flow1</incoming>
+      <outgoing>Flow2</outgoing>
+    </userTask>
+
+    <userTask id="Task_PresentOptions" name="Present Options">
+      <incoming>Flow2</incoming>
+      <outgoing>Flow3</outgoing>
+    </userTask>
+
+    <userTask id="Task_SelectFlight" name="Select Flight">
+      <incoming>Flow3</incoming>
+      <outgoing>Flow4</outgoing>
+    </userTask>
+
+    <serviceTask id="Task_BookFlight" name="Book Flight">
+      <incoming>Flow4</incoming>
+      <outgoing>Flow5</outgoing>
+    </serviceTask>
+
+    <serviceTask id="Task_ProcessPayment" name="Process Payment">
+      <incoming>Flow5</incoming>
+      <outgoing>Flow6</outgoing>
+    </serviceTask>
+
+    <serviceTask id="Task_IssueTicket" name="Issue Ticket">
+      <incoming>Flow6</incoming>
+      <outgoing>Flow7</outgoing>
+    </serviceTask>
+
+    <userTask id="Task_NotifyCustomer" name="Notify Customer">
+      <incoming>Flow7</incoming>
+      <outgoing>Flow8</outgoing>
+    </userTask>
+
+    <endEvent id="EndEvent_Done" name="Booking Completed">
+      <incoming>Flow8</incoming>
+    </endEvent>
+
+    <!-- Sequence Flows -->
+    <sequenceFlow id="Flow1" sourceRef="StartEvent_Request" targetRef="Task_SearchFlights"/>
+    <sequenceFlow id="Flow2" sourceRef="Task_SearchFlights" targetRef="Task_PresentOptions"/>
+    <sequenceFlow id="Flow3" sourceRef="Task_PresentOptions" targetRef="Task_SelectFlight"/>
+    <sequenceFlow id="Flow4" sourceRef="Task_SelectFlight" targetRef="Task_BookFlight"/>
+    <sequenceFlow id="Flow5" sourceRef="Task_BookFlight" targetRef="Task_ProcessPayment"/>
+    <sequenceFlow id="Flow6" sourceRef="Task_ProcessPayment" targetRef="Task_IssueTicket"/>
+    <sequenceFlow id="Flow7" sourceRef="Task_IssueTicket" targetRef="Task_NotifyCustomer"/>
+    <sequenceFlow id="Flow8" sourceRef="Task_NotifyCustomer" targetRef="EndEvent_Done"/>
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_FlightBooking">
+    <bpmndi:BPMNPlane id="BPMNPlane_FlightBooking" bpmnElement="FlightBookingProcess">
+
+      <!-- Shapes -->
+      <bpmndi:BPMNShape id="StartEvent_Request_di" bpmnElement="StartEvent_Request">
+        <omgdc:Bounds x="100" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_SearchFlights_di" bpmnElement="Task_SearchFlights">
+        <omgdc:Bounds x="160" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_PresentOptions_di" bpmnElement="Task_PresentOptions">
+        <omgdc:Bounds x="300" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_SelectFlight_di" bpmnElement="Task_SelectFlight">
+        <omgdc:Bounds x="440" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_BookFlight_di" bpmnElement="Task_BookFlight">
+        <omgdc:Bounds x="580" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_ProcessPayment_di" bpmnElement="Task_ProcessPayment">
+        <omgdc:Bounds x="720" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_IssueTicket_di" bpmnElement="Task_IssueTicket">
+        <omgdc:Bounds x="860" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_NotifyCustomer_di" bpmnElement="Task_NotifyCustomer">
+        <omgdc:Bounds x="1000" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_Done_di" bpmnElement="EndEvent_Done">
+        <omgdc:Bounds x="1140" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="Flow1_di" bpmnElement="Flow1">
+        <omgdi:waypoint x="136" y="118"/>
+        <omgdi:waypoint x="160" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow2_di" bpmnElement="Flow2">
+        <omgdi:waypoint x="280" y="118"/>
+        <omgdi:waypoint x="300" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow3_di" bpmnElement="Flow3">
+        <omgdi:waypoint x="420" y="118"/>
+        <omgdi:waypoint x="440" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow4_di" bpmnElement="Flow4">
+        <omgdi:waypoint x="560" y="118"/>
+        <omgdi:waypoint x="580" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow5_di" bpmnElement="Flow5">
+        <omgdi:waypoint x="700" y="118"/>
+        <omgdi:waypoint x="720" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow6_di" bpmnElement="Flow6">
+        <omgdi:waypoint x="840" y="118"/>
+        <omgdi:waypoint x="860" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow7_di" bpmnElement="Flow7">
+        <omgdi:waypoint x="980" y="118"/>
+        <omgdi:waypoint x="1000" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow8_di" bpmnElement="Flow8">
+        <omgdi:waypoint x="1120" y="118"/>
+        <omgdi:waypoint x="1140" y="118"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

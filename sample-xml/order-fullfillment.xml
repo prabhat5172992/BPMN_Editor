@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://example.com/orderprocess"
+             xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+
+  <process id="OrderFulfillmentProcess" name="Customer Order Fulfillment Process" isExecutable="true">
+    
+    <!-- Start Event -->
+    <startEvent id="orderReceived" name="Order Received">
+      <outgoing>flow1</outgoing>
+    </startEvent>
+    
+    <!-- User Task: Validate Order -->
+    <userTask id="validateOrder" name="Validate Order Details">
+      <incoming>flow1</incoming>
+      <outgoing>flow2</outgoing>
+    </userTask>
+    
+    <!-- Exclusive Gateway: Order Valid? -->
+    <exclusiveGateway id="orderValidGateway" name="Order Valid?">
+      <incoming>flow2</incoming>
+      <outgoing>flow3</outgoing>
+      <outgoing>flow4</outgoing>
+    </exclusiveGateway>
+    
+    <!-- User Task: Request Order Correction -->
+    <userTask id="requestCorrection" name="Request Order Correction">
+      <incoming>flow3</incoming>
+      <outgoing>flow5</outgoing>
+    </userTask>
+    
+    <!-- Service Task: Check Inventory -->
+    <serviceTask id="checkInventory" name="Check Product Availability">
+      <incoming>flow4</incoming>
+      <outgoing>flow6</outgoing>
+    </serviceTask>
+    
+    <!-- Exclusive Gateway: Items Available? -->
+    <exclusiveGateway id="inventoryGateway" name="Items Available?">
+      <incoming>flow6</incoming>
+      <outgoing>flow7</outgoing>
+      <outgoing>flow8</outgoing>
+    </exclusiveGateway>
+    
+    <!-- User Task: Handle Backorder -->
+    <userTask id="handleBackorder" name="Handle Backorder">
+      <incoming>flow7</incoming>
+      <outgoing>flow9</outgoing>
+    </userTask>
+    
+    <!-- Service Task: Reserve Inventory -->
+    <serviceTask id="reserveInventory" name="Reserve Inventory">
+      <incoming>flow8</incoming>
+      <outgoing>flow10</outgoing>
+    </serviceTask>
+    
+    <!-- Service Task: Process Payment -->
+    <serviceTask id="processPayment" name="Process Payment">
+      <incoming>flow10</incoming>
+      <incoming>flow9</incoming>
+      <outgoing>flow11</outgoing>
+    </serviceTask>
+    
+    <!-- Exclusive Gateway: Payment Successful? -->
+    <exclusiveGateway id="paymentGateway" name="Payment Successful?">
+      <incoming>flow11</incoming>
+      <outgoing>flow12</outgoing>
+      <outgoing>flow13</outgoing>
+    </exclusiveGateway>
+    
+    <!-- User Task: Handle Payment Failure -->
+    <userTask id="handlePaymentFailure" name="Handle Payment Failure">
+      <incoming>flow12</incoming>
+      <outgoing>flow14</outgoing>
+    </userTask>
+    
+    <!-- Parallel Gateway: Split for Fulfillment -->
+    <parallelGateway id="fulfillmentSplit" name="Start Fulfillment">
+      <incoming>flow13</incoming>
+      <outgoing>flow15</outgoing>
+      <outgoing>flow16</outgoing>
+    </parallelGateway>
+    
+    <!-- Service Task: Generate Picking List -->
+    <serviceTask id="generatePickingList" name="Generate Picking List">
+      <incoming>flow15</incoming>
+      <outgoing>flow17</outgoing>
+    </serviceTask>
+    
+    <!-- Service Task: Send Confirmation Email -->
+    <serviceTask id="sendConfirmation" name="Send Order Confirmation">
+      <incoming>flow16</incoming>
+      <outgoing>flow18</outgoing>
+    </serviceTask>
+    
+    <!-- User Task: Pick Items -->
+    <userTask id="pickItems" name="Pick Items from Warehouse">
+      <incoming>flow17</incoming>
+      <outgoing>flow19</outgoing>
+    </userTask>
+    
+    <!-- User Task: Package Order -->
+    <userTask id="packageOrder" name="Package Order">
+      <incoming>flow19</incoming>
+      <outgoing>flow20</outgoing>
+    </userTask>
+    
+    <!-- Service Task: Generate Shipping Label -->
+    <serviceTask id="generateShippingLabel" name="Generate Shipping Label">
+      <incoming>flow20</incoming>
+      <outgoing>flow21</outgoing>
+    </serviceTask>
+    
+    <!-- Parallel Gateway: Join -->
+    <parallelGateway id="fulfillmentJoin" name="Fulfillment Complete">
+      <incoming>flow21</incoming>
+      <incoming>flow18</incoming>
+      <outgoing>flow22</outgoing>
+    </parallelGateway>
+    
+    <!-- Service Task: Ship Order -->
+    <serviceTask id="shipOrder" name="Ship Order">
+      <incoming>flow22</incoming>
+      <outgoing>flow23</outgoing>
+    </serviceTask>
+    
+    <!-- Service Task: Send Tracking Info -->
+    <serviceTask id="sendTracking" name="Send Tracking Information">
+      <incoming>flow23</incoming>
+      <outgoing>flow24</outgoing>
+    </serviceTask>
+    
+    <!-- End Events -->
+    <endEvent id="orderCompleted" name="Order Completed Successfully">
+      <incoming>flow24</incoming>
+    </endEvent>
+    
+    <endEvent id="orderCancelled" name="Order Cancelled">
+      <incoming>flow5</incoming>
+      <incoming>flow14</incoming>
+    </endEvent>
+    
+    <!-- Sequence Flows -->
+    <sequenceFlow id="flow1" sourceRef="orderReceived" targetRef="validateOrder"/>
+    <sequenceFlow id="flow2" sourceRef="validateOrder" targetRef="orderValidGateway"/>
+    <sequenceFlow id="flow3" sourceRef="orderValidGateway" targetRef="requestCorrection" name="Invalid">
+      <conditionExpression xsi:type="tFormalExpression">${orderValid == false}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow4" sourceRef="orderValidGateway" targetRef="checkInventory" name="Valid">
+      <conditionExpression xsi:type="tFormalExpression">${orderValid == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow5" sourceRef="requestCorrection" targetRef="orderCancelled"/>
+    <sequenceFlow id="flow6" sourceRef="checkInventory" targetRef="inventoryGateway"/>
+    <sequenceFlow id="flow7" sourceRef="inventoryGateway" targetRef="handleBackorder" name="Backorder">
+      <conditionExpression xsi:type="tFormalExpression">${inventoryAvailable == false}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow8" sourceRef="inventoryGateway" targetRef="reserveInventory" name="Available">
+      <conditionExpression xsi:type="tFormalExpression">${inventoryAvailable == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow9" sourceRef="handleBackorder" targetRef="processPayment"/>
+    <sequenceFlow id="flow10" sourceRef="reserveInventory" targetRef="processPayment"/>
+    <sequenceFlow id="flow11" sourceRef="processPayment" targetRef="paymentGateway"/>
+    <sequenceFlow id="flow12" sourceRef="paymentGateway" targetRef="handlePaymentFailure" name="Failed">
+      <conditionExpression xsi:type="tFormalExpression">${paymentSuccessful == false}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow13" sourceRef="paymentGateway" targetRef="fulfillmentSplit" name="Successful">
+      <conditionExpression xsi:type="tFormalExpression">${paymentSuccessful == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow14" sourceRef="handlePaymentFailure" targetRef="orderCancelled"/>
+    <sequenceFlow id="flow15" sourceRef="fulfillmentSplit" targetRef="generatePickingList"/>
+    <sequenceFlow id="flow16" sourceRef="fulfillmentSplit" targetRef="sendConfirmation"/>
+    <sequenceFlow id="flow17" sourceRef="generatePickingList" targetRef="pickItems"/>
+    <sequenceFlow id="flow18" sourceRef="sendConfirmation" targetRef="fulfillmentJoin"/>
+    <sequenceFlow id="flow19" sourceRef="pickItems" targetRef="packageOrder"/>
+    <sequenceFlow id="flow20" sourceRef="packageOrder" targetRef="generateShippingLabel"/>
+    <sequenceFlow id="flow21" sourceRef="generateShippingLabel" targetRef="fulfillmentJoin"/>
+    <sequenceFlow id="flow22" sourceRef="fulfillmentJoin" targetRef="shipOrder"/>
+    <sequenceFlow id="flow23" sourceRef="shipOrder" targetRef="sendTracking"/>
+    <sequenceFlow id="flow24" sourceRef="sendTracking" targetRef="orderCompleted"/>
+    
+  </process>
+
+  <!-- BPMN Diagram Interchange (Visual Layout) -->
+  <bpmndi:BPMNDiagram id="OrderFulfillmentDiagram">
+    <bpmndi:BPMNPlane id="OrderFulfillmentPlane" bpmnElement="OrderFulfillmentProcess">
+      
+      <!-- Start Event -->
+      <bpmndi:BPMNShape id="orderReceived_di" bpmnElement="orderReceived">
+        <omgdc:Bounds x="100" y="200" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="85" y="243" width="66" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- User Task: Validate Order -->
+      <bpmndi:BPMNShape id="validateOrder_di" bpmnElement="validateOrder">
+        <omgdc:Bounds x="200" y="178" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Order Valid Gateway -->
+      <bpmndi:BPMNShape id="orderValidGateway_di" bpmnElement="orderValidGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="350" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="344" y="250" width="62" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Request Correction -->
+      <bpmndi:BPMNShape id="requestCorrection_di" bpmnElement="requestCorrection">
+        <omgdc:Bounds x="325" y="80" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Check Inventory -->
+      <bpmndi:BPMNShape id="checkInventory_di" bpmnElement="checkInventory">
+        <omgdc:Bounds x="450" y="178" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Inventory Gateway -->
+      <bpmndi:BPMNShape id="inventoryGateway_di" bpmnElement="inventoryGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="600" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="585" y="250" width="80" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Handle Backorder -->
+      <bpmndi:BPMNShape id="handleBackorder_di" bpmnElement="handleBackorder">
+        <omgdc:Bounds x="575" y="300" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Reserve Inventory -->
+      <bpmndi:BPMNShape id="reserveInventory_di" bpmnElement="reserveInventory">
+        <omgdc:Bounds x="700" y="178" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Process Payment -->
+      <bpmndi:BPMNShape id="processPayment_di" bpmnElement="processPayment">
+        <omgdc:Bounds x="850" y="178" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Payment Gateway -->
+      <bpmndi:BPMNShape id="paymentGateway_di" bpmnElement="paymentGateway" isMarkerVisible="true">
+        <omgdc:Bounds x="1000" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="981" y="250" width="88" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Handle Payment Failure -->
+      <bpmndi:BPMNShape id="handlePaymentFailure_di" bpmnElement="handlePaymentFailure">
+        <omgdc:Bounds x="975" y="300" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Fulfillment Split -->
+      <bpmndi:BPMNShape id="fulfillmentSplit_di" bpmnElement="fulfillmentSplit">
+        <omgdc:Bounds x="1100" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1085" y="250" width="80" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Generate Picking List -->
+      <bpmndi:BPMNShape id="generatePickingList_di" bpmnElement="generatePickingList">
+        <omgdc:Bounds x="1200" y="120" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Send Confirmation -->
+      <bpmndi:BPMNShape id="sendConfirmation_di" bpmnElement="sendConfirmation">
+        <omgdc:Bounds x="1200" y="240" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Pick Items -->
+      <bpmndi:BPMNShape id="pickItems_di" bpmnElement="pickItems">
+        <omgdc:Bounds x="1350" y="120" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Package Order -->
+      <bpmndi:BPMNShape id="packageOrder_di" bpmnElement="packageOrder">
+        <omgdc:Bounds x="1500" y="120" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Generate Shipping Label -->
+      <bpmndi:BPMNShape id="generateShippingLabel_di" bpmnElement="generateShippingLabel">
+        <omgdc:Bounds x="1650" y="120" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Fulfillment Join -->
+      <bpmndi:BPMNShape id="fulfillmentJoin_di" bpmnElement="fulfillmentJoin">
+        <omgdc:Bounds x="1800" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1785" y="250" width="80" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Ship Order -->
+      <bpmndi:BPMNShape id="shipOrder_di" bpmnElement="shipOrder">
+        <omgdc:Bounds x="1900" y="178" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Send Tracking -->
+      <bpmndi:BPMNShape id="sendTracking_di" bpmnElement="sendTracking">
+        <omgdc:Bounds x="2050" y="178" width="100" height="80"/>
+        <bpmndi:BPMNLabel/>
+      </bpmndi:BPMNShape>
+      
+      <!-- End Events -->
+      <bpmndi:BPMNShape id="orderCompleted_di" bpmnElement="orderCompleted">
+        <omgdc:Bounds x="2200" y="200" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="2183" y="243" width="70" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <bpmndi:BPMNShape id="orderCancelled_di" bpmnElement="orderCancelled">
+        <omgdc:Bounds x="200" y="50" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="183" y="93" width="70" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Sequence Flow Edges -->
+      <bpmndi:BPMNEdge id="flow1_di" bpmnElement="flow1">
+        <omgdi:waypoint x="136" y="218"/>
+        <omgdi:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow2_di" bpmnElement="flow2">
+        <omgdi:waypoint x="300" y="218"/>
+        <omgdi:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow3_di" bpmnElement="flow3">
+        <omgdi:waypoint x="375" y="193"/>
+        <omgdi:waypoint x="375" y="160"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="379" y="173" width="32" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow4_di" bpmnElement="flow4">
+        <omgdi:waypoint x="400" y="218"/>
+        <omgdi:waypoint x="450" y="218"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="417" y="200" width="25" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow5_di" bpmnElement="flow5">
+        <omgdi:waypoint x="325" y="120"/>
+        <omgdi:waypoint x="218" y="120"/>
+        <omgdi:waypoint x="218" y="86"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow6_di" bpmnElement="flow6">
+        <omgdi:waypoint x="550" y="218"/>
+        <omgdi:waypoint x="600" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow7_di" bpmnElement="flow7">
+        <omgdi:waypoint x="625" y="243"/>
+        <omgdi:waypoint x="625" y="300"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="630" y="265" width="50" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow8_di" bpmnElement="flow8">
+        <omgdi:waypoint x="650" y="218"/>
+        <omgdi:waypoint x="700" y="218"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="665" y="200" width="43" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow9_di" bpmnElement="flow9">
+        <omgdi:waypoint x="675" y="340"/>
+        <omgdi:waypoint x="900" y="340"/>
+        <omgdi:waypoint x="900" y="258"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow10_di" bpmnElement="flow10">
+        <omgdi:waypoint x="800" y="218"/>
+        <omgdi:waypoint x="850" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow11_di" bpmnElement="flow11">
+        <omgdi:waypoint x="950" y="218"/>
+        <omgdi:waypoint x="1000" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow12_di" bpmnElement="flow12">
+        <omgdi:waypoint x="1025" y="243"/>
+        <omgdi:waypoint x="1025" y="300"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1030" y="265" width="29" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow13_di" bpmnElement="flow13">
+        <omgdi:waypoint x="1050" y="218"/>
+        <omgdi:waypoint x="1100" y="218"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1065" y="200" width="55" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow14_di" bpmnElement="flow14">
+        <omgdi:waypoint x="975" y="340"/>
+        <omgdi:waypoint x="218" y="340"/>
+        <omgdi:waypoint x="218" y="86"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow15_di" bpmnElement="flow15">
+        <omgdi:waypoint x="1125" y="193"/>
+        <omgdi:waypoint x="1125" y="160"/>
+        <omgdi:waypoint x="1200" y="160"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow16_di" bpmnElement="flow16">
+        <omgdi:waypoint x="1125" y="243"/>
+        <omgdi:waypoint x="1125" y="280"/>
+        <omgdi:waypoint x="1200" y="280"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow17_di" bpmnElement="flow17">
+        <omgdi:waypoint x="1300" y="160"/>
+        <omgdi:waypoint x="1350" y="160"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow18_di" bpmnElement="flow18">
+        <omgdi:waypoint x="1300" y="280"/>
+        <omgdi:waypoint x="1825" y="280"/>
+        <omgdi:waypoint x="1825" y="243"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow19_di" bpmnElement="flow19">
+        <omgdi:waypoint x="1450" y="160"/>
+        <omgdi:waypoint x="1500" y="160"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow20_di" bpmnElement="flow20">
+        <omgdi:waypoint x="1600" y="160"/>
+        <omgdi:waypoint x="1650" y="160"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow21_di" bpmnElement="flow21">
+        <omgdi:waypoint x="1750" y="160"/>
+        <omgdi:waypoint x="1825" y="160"/>
+        <omgdi:waypoint x="1825" y="193"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow22_di" bpmnElement="flow22">
+        <omgdi:waypoint x="1850" y="218"/>
+        <omgdi:waypoint x="1900" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow23_di" bpmnElement="flow23">
+        <omgdi:waypoint x="2000" y="218"/>
+        <omgdi:waypoint x="2050" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="flow24_di" bpmnElement="flow24">
+        <omgdi:waypoint x="2150" y="218"/>
+        <omgdi:waypoint x="2200" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>

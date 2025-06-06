@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             id="Definitions_1"
+             targetNamespace="http://example.com/bpmn20">
+
+  <process id="BankAccountOpening" name="Bank Account Opening Process" isExecutable="true">
+    <startEvent id="StartEvent_1" name="Customer Request">
+      <outgoing>Flow1</outgoing>
+    </startEvent>
+
+    <userTask id="Task_SubmitApplication" name="Submit Application">
+      <incoming>Flow1</incoming>
+      <outgoing>Flow2</outgoing>
+    </userTask>
+
+    <userTask id="Task_VerifyDocuments" name="Verify Documents">
+      <incoming>Flow2</incoming>
+      <outgoing>Flow3</outgoing>
+    </userTask>
+
+    <exclusiveGateway id="Gateway_DocsValid" name="Documents Valid?">
+      <incoming>Flow3</incoming>
+      <outgoing>Flow4</outgoing>
+      <outgoing>Flow5</outgoing>
+    </exclusiveGateway>
+
+    <userTask id="Task_RequestDocs" name="Request More Documents">
+      <incoming>Flow5</incoming>
+      <outgoing>Flow2</outgoing>
+    </userTask>
+
+    <serviceTask id="Task_CreateAccount" name="Create Account">
+      <incoming>Flow4</incoming>
+      <outgoing>Flow6</outgoing>
+    </serviceTask>
+
+    <userTask id="Task_NotifyCustomer" name="Send Notification">
+      <incoming>Flow6</incoming>
+      <outgoing>Flow7</outgoing>
+    </userTask>
+
+    <endEvent id="EndEvent_1" name="Account Opened">
+      <incoming>Flow7</incoming>
+    </endEvent>
+
+    <!-- Sequence Flows -->
+    <sequenceFlow id="Flow1" sourceRef="StartEvent_1" targetRef="Task_SubmitApplication"/>
+    <sequenceFlow id="Flow2" sourceRef="Task_SubmitApplication" targetRef="Task_VerifyDocuments"/>
+    <sequenceFlow id="Flow3" sourceRef="Task_VerifyDocuments" targetRef="Gateway_DocsValid"/>
+    <sequenceFlow id="Flow4" sourceRef="Gateway_DocsValid" targetRef="Task_CreateAccount"/>
+    <sequenceFlow id="Flow5" sourceRef="Gateway_DocsValid" targetRef="Task_RequestDocs"/>
+    <sequenceFlow id="Flow6" sourceRef="Task_CreateAccount" targetRef="Task_NotifyCustomer"/>
+    <sequenceFlow id="Flow7" sourceRef="Task_NotifyCustomer" targetRef="EndEvent_1"/>
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_BankAccountOpening">
+    <bpmndi:BPMNPlane id="BPMNPlane_BankAccountOpening" bpmnElement="BankAccountOpening">
+
+      <!-- Shapes -->
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <omgdc:Bounds x="100" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_SubmitApplication_di" bpmnElement="Task_SubmitApplication">
+        <omgdc:Bounds x="160" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_VerifyDocuments_di" bpmnElement="Task_VerifyDocuments">
+        <omgdc:Bounds x="310" y="90" width="120" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Gateway_DocsValid_di" bpmnElement="Gateway_DocsValid" isMarkerVisible="true">
+        <omgdc:Bounds x="460" y="100" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_RequestDocs_di" bpmnElement="Task_RequestDocs">
+        <omgdc:Bounds x="550" y="170" width="140" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_CreateAccount_di" bpmnElement="Task_CreateAccount">
+        <omgdc:Bounds x="550" y="60" width="140" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_NotifyCustomer_di" bpmnElement="Task_NotifyCustomer">
+        <omgdc:Bounds x="720" y="60" width="140" height="56"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <omgdc:Bounds x="890" y="80" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="Flow1_di" bpmnElement="Flow1">
+        <omgdi:waypoint x="136" y="118"/>
+        <omgdi:waypoint x="160" y="118"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow2_di" bpmnElement="Flow2">
+        <omgdi:waypoint x="280" y="118"/>
+        <omgdi:waypoint x="310" y="118"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow3_di" bpmnElement="Flow3">
+        <omgdi:waypoint x="430" y="118"/>
+        <omgdi:waypoint x="460" y="118"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow4_di" bpmnElement="Flow4">
+        <omgdi:waypoint x="510" y="118"/>
+        <omgdi:waypoint x="550" y="88"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow5_di" bpmnElement="Flow5">
+        <omgdi:waypoint x="510" y="118"/>
+        <omgdi:waypoint x="550" y="198"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow6_di" bpmnElement="Flow6">
+        <omgdi:waypoint x="690" y="88"/>
+        <omgdi:waypoint x="720" y="88"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow7_di" bpmnElement="Flow7">
+        <omgdi:waypoint x="860" y="88"/>
+        <omgdi:waypoint x="890" y="98"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

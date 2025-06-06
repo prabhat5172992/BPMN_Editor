@@ -1,5 +1,7 @@
 {
-  "name": "vite-project",
+  "name": "bpmn-editor",
+  "description": "A BPMN editor built with React and Vite",
+  "author": "Prabhat Ranjan",
   "private": true,
   "version": "0.0.0",
   "type": "module",
